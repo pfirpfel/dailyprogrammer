@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>regex fractal</title>
+</head>
+<body>
+<label for="regex">Regex</label>
+<input id="regex" size="100" type="text" placeholder="regex" value="/[13][24][^1][^2][^3][^4]/g"></input><br>
+<label for="cwidth">Width</label>
+<input id="cwidth" type="number" placeholder="width" value="256"></input>&nbsp;&nbsp;&nbsp;
+<label for="cheight">Heigth</label>
+<input id="cheight" type="number" placeholder="height" value="256"></input>&nbsp;&nbsp;&nbsp;
+<button id="btnDraw" onclick="drawRegex()">Draw</button><br>
+<canvas id="regexCanvas" width="256" height="256" style="border:1px solid #c3c3c3;">
+Your browser does not support the HTML5 canvas tag.
+</canvas><br>
+<p><a href="http://www.reddit.com/r/dailyprogrammer/comments/2fkh8u/9052014_challenge_178_hard_regular_expression/">Link to Challenge</a></p>
+<script>
+var c, ctx, regex;
+
+function drawRegex(){
+  // regex
+  var reg = document.getElementById("regex").value;
+  var match = reg.match(new RegExp('^/(.*?)/(g?i?m?y?)$'));
+  if( !(Array.isArray(match) && match.length === 3) ){
+    alert("invalid regex");
+    return;
+  }  
+  regex = new RegExp(match[1], match[2]);
+
+  // canvas
+  var w = document.getElementById("cwidth").value;
+  var h = document.getElementById("cheight").value;
+  ctx.canvas.width = w;
+  ctx.canvas.height = h;
+  ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height);
+
+  // draw it!
+  drawRegexRec("", 0, ctx.canvas.width, 0, ctx.canvas.height);
+}
+
+function drawRegexRec(pixelId, xmin, xmax, ymin, ymax){
+  if(xmin === xmax){
+    var matches = regex.exec(pixelId);
+    if(matches !== null){
+      var color = 255 * matches.length * pixelId.length;
+      setPixel(xmin, ymin, color, 0, 0);
+    }
+  } else {
+    var xmid = ~~((xmin + xmax) / 2);
+    var ymid = ~~((ymin + ymax) / 2);
+    drawRegexRec(pixelId + "1", xmid + 1, xmax, ymin, ymid);
+    drawRegexRec(pixelId + "2", xmin, xmid, ymin, ymid);
+    drawRegexRec(pixelId + "3", xmin, xmid, ymid + 1, ymax);
+    drawRegexRec(pixelId + "4", xmid + 1, xmax, ymid + 1, ymax);
+  }
+}
+
+function setPixel(x, y, r, g, b){
+  ctx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+  ctx.fillRect(x, y, 1, 1);
+}
+
+c = document.getElementById("regexCanvas");
+ctx = c.getContext("2d");
+regex = null;
+</script>
+</body>
+</html>
